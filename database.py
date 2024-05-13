@@ -1,6 +1,7 @@
 import sqlite3
 from flask import g
 
+
 DATABASE = 'database.db'
 
 def get_db():
@@ -16,8 +17,16 @@ def close_db(exception=None):
         db.close()
 
 
+
 # ---------------- QUERYING FUNCTIONS --------------
-def query_db(query, args=(), one=False):
+def query_db(query, args=(), one=False, commit=False):
+    if commit:
+        print("commit")
+        db = get_db()
+        cur = db.execute(query, args)
+        db.commit()
+        cur.close
+        return None
     cur = get_db().execute(query, args)
     rv = cur.fetchall()
     cur.close()

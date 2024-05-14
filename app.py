@@ -6,6 +6,26 @@ from datetime import datetime
 
 init_db(app)
 
+##################################### Multi-relation Query with #####################################
+# 1. At least two of the five queries should deal with data from more than one table, i.e., 
+#    you should use at least two multirelation queries              [1/2]
+# 2. You should make use of SQL JOIN                                [1/1]
+# 3. You should make use of Aggregation and/or Grouping             [1/1]
+# 4. You should make use of at least two of the following:          
+#     a. Triggers                                                   [0/1]
+#     b. Procedures                                                 [0/1]
+#     c. Funcitons                                                  [0/1]
+
+##################################### Example future Queries #####################################
+# JOIN with two datasets Showing booking history for a specific player (golf id)
+# SELECT bookings.booking_id, bookings.club_id, bookings.date, bookings.tee_time, bookings.numberOfPlayers, courses.club_id
+# FROM bookings
+# JOIN courses on bookings.club_id = courses.club_id
+# WHERE bookings.golf_id = '020331-015'
+# ORDER BY bookings.date, bookings.tee_time;
+
+
+
 
 ##################################### HELPER FUNCTIONS #####################################
 
@@ -39,6 +59,51 @@ def book():
         previous_bookings = query_db("SELECT bookings.booking_id, bookings.tee_time, bookings.date, bookings.numberOfPlayers FROM bookings where bookings.date = ?", [date])
         previous_bookings = [dict(row) for row in previous_bookings]
     return render_template('book.html', club_id=club_id, golf_id=golf_id, available_times=available_times, previous_bookings=previous_bookings, date=date)
+@app.route('/book', methods=['POST'])
+def book_create():
+    club_id = request.form['club_id']
+    golf_id = request.form['golf_id']
+    date = request.form['booking_date']
+    numberOfPlayers = request.form['NumberOfPlayers']
+    tee_time = request.form['booking_time']
+    query_db("INSERT INTO bookings(club_id, golf_id, numberOfPlayers, date, tee_time) VALUES(?, ?, ?, ?, ?)", [club_id, golf_id, numberOfPlayers, date, tee_time], commit=True)
+    return redirect(url_for('booking_confirmation'))
+
+@app.route('/booking_confirmation')
+def booking_confirmation():
+    return render_template('booking_confirmation.html')
+
+
+@app.route('/profile')
+def profile():
+    golf_id = session.get('golf_id')  # Assuming you store the logged-in user's golf_id in the session
+    club_id = request.args.get('club_id')  # Get club_id from the query parameters for filtering
+
+    # Fetch user details
+    user_details = query_db("SELECT first_name, last_name, golf_id, email, hcp FROM Players WHERE golf_id = ?", [golf_id], one=True)
+
+    # Fetch courses for dropdown
+    courses = query_db("SELECT club_id, club_name FROM courses")
+
+    # Build the query for booking history
+    query = """
+        SELECT b.booking_id, b.club_id, b.date, b.tee_time, b.numberOfPlayers, b.price, c.club_name
+        FROM bookings b
+        JOIN courses c ON b.club_id = c.club_id
+        WHERE b.golf_id = ?
+    """
+    params = [golf_id]
+
+    # If a club_id is provided, filter by it
+    if club_id:
+        query += " AND b.club_id = ?"
+        params.append(club_id)
+
+    query += " ORDER BY b.date DESC, b.tee_time ASC"
+    booking_history = query_db(query, params)
+
+    return render_template('profile.html', user=user_details, bookings=booking_history, courses=courses)
+
 
 
 @app.route('/login', methods=['POST'])
@@ -50,9 +115,10 @@ def login():
     player = query_db("SELECT * FROM players WHERE golf_id = ? and password = ?", [golf_id, password],one=True)
     print("player: ", player)
     if player:
+        print("adding golf_id to session")
         session['golf_id'] = golf_id
-        return redirect(url_for('show_courses', golf_id=golf_id))
-    return redirect(url_for('show_courses', golf_id=golf_id))
+        return redirect(url_for('profile', golf_id=golf_id))
+    return redirect(url_for('login', golf_id=golf_id))
 
 @app.route('/dashboard')
 def dashboard():

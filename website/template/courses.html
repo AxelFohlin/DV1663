@@ -8,11 +8,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2>Welcome, {{ user['firstName'] }} {{ user['lastName'] }}</h2>
-        <p>Golf ID: {{ user['golf_id'] }}</p>
-        <p>Email: {{ user['Email'] }}</p>
-        <p>Handicap: {{ user['HCP'] }}</p>
-        <a href="{{ url_for('logout') }}" class="btn btn-primary">Logout</a>
+        
         
         <h2 class="mt-5">Select a Golf Course</h2>
         <form action="/book" method="get">
@@ -24,7 +20,8 @@
                     {% endfor %}
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Find Available Tee Times</button>
+            <a href="{{ url_for('profile') }}" class="btn btn-secondary mb-3">Back to Profile</a>
+            <button type="submit" class="btn btn-primary mb-3">Find Available Tee Times</button>
         </form>
     </div>
 </body>

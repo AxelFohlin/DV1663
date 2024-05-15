@@ -8,8 +8,8 @@
 </head>
 <body>
     <div class="container mt-5">
+        
         <h2>Book a Slot</h2>
-        <!-- Date selection form -->
         <form action="/book" method="get">
             <div class="mb-3">
                 <label for="club_id" class="form-label">Club ID</label>
@@ -23,10 +23,20 @@
                 <label for="booking_date" class="form-label">Booking Date</label>
                 <input type="date" class="form-control" id="booking_date" name="booking_date" value="{{ date }}" required>
             </div>
-            <button type="submit" class="btn btn-primary">Find Time</button>
+            <a href="{{ url_for('show_courses') }}" class="btn btn-secondary mb-3">Back to Courses</a>
+            <button type="submit" class="btn btn-primary mb-3">Find Time</button>
+            <!-- Flash messages display area -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
         </form>
         {% if date %}
-        <!-- Time selection and booking form -->
         <form action="/book" method="post">
             <input type="hidden" name="club_id" value="{{ club_id }}">
             <input type="hidden" name="golf_id" value="{{ golf_id }}">
@@ -47,7 +57,6 @@
         </form>
         {% endif %}
         {% if previous_bookings %}
-        <!-- Previous bookings table -->
         <h2 class="mt-5">Bookings for {{ date }}</h2>
         <table class="table table-bordered">
             <thead>

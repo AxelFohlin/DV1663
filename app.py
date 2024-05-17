@@ -156,10 +156,13 @@ def register():
     email = request.form['email']
     first_name = request.form['first_name']
     last_name = request.form['last_name']
+    club_id = request.form['club_id']
+    print(club_id)
     hcp = random_hcp()
     query_database("INSERT INTO players(golf_id, password, email, first_name, last_name, hcp) VALUES(?, ?, ?, ?, ?, ?)", [golf_id, password, email, first_name, last_name, hcp], commit=True)
     # return send_from_directory('website/static', 'login.html')
     print("here")
+    query_database("INSERT INTO membership(golf_id, club_id) VALUES(?, ?)", [golf_id, club_id], commit=True)
     return redirect(url_for('registration_success', golf_id=golf_id))
 
 @app.route('/register')

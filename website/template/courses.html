@@ -23,6 +23,12 @@
             <a href="{{ url_for('profile') }}" class="btn btn-secondary mb-3">Back to Profile</a>
             <button type="submit" class="btn btn-primary mb-3">Find Available Tee Times</button>
         </form>
+        <h3>Top Played Courses</h3>
+        <ul class="list-group mb-4">
+            {% for course in favorite_courses %}
+                <li class="list-group-item">{{ course['club_name'] }} - Played {{ course['times_booked'] }} times</li>
+            {% endfor %}
+        </ul>
     </div>
 </body>
 </html>

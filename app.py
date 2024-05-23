@@ -36,7 +36,6 @@ def serve_static_html(filename):
 
 @app.route('/book', methods=['GET'])
 def book():
-    # PERHAPS CHANGE TO PROCEDURE IN CASE NEED
     club_id = request.args.get('club_id')
     if club_id is None:
         club_id = session.get("club_id")
@@ -146,7 +145,8 @@ def show_courses():
     golf_id = session.get('golf_id')
     user = query_database('SELECT * FROM Players WHERE golf_id = ?', [golf_id], one=True)
     courses = query_database("SELECT * FROM Courses")
-    return render_template('courses.html', courses=courses, user=user)
+    favorite_courses = query_database("SELECT courses.club_name, COUNT(bookings.booking_id) AS times_booked FROM bookings JOIN courses ON bookings.club_id = courses.club_id WHERE bookings.golf_id = ? GROUP BY bookings.club_id ORDER BY times_booked DESC LIMIT 3", [golf_id])
+    return render_template('courses.html', courses=courses, user=user, favorite_courses=favorite_courses)
 
 @app.route('/register/new_user', methods=['POST'])
 def register():
@@ -160,7 +160,7 @@ def register():
     print(club_id)
     hcp = random_hcp()
     query_database("INSERT INTO players(golf_id, password, email, first_name, last_name, hcp) VALUES(?, ?, ?, ?, ?, ?)", [golf_id, password, email, first_name, last_name, hcp], commit=True)
-    # return send_from_directory('website/static', 'login.html')
+
     print("here")
     query_database("INSERT INTO membership(golf_id, club_id) VALUES(?, ?)", [golf_id, club_id], commit=True)
     return redirect(url_for('registration_success', golf_id=golf_id))
@@ -211,8 +211,6 @@ def calculate_greenfee(golf_id, club_id, number_of_players):
         price = 0
     else:
         greenfee = query_database("SELECT greenfee FROM courses WHERE club_id = ?", [club_id],one=True)["greenfee"]
-        print(float(greenfee))
-        print(float(number_of_players))
         price = float(greenfee) * float(number_of_players)
     query_database("UPDATE bookings SET price = ? WHERE booking_id = ?", [price, booking_id], commit=True)
 

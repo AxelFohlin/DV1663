@@ -4,6 +4,7 @@
     pip install sqlite
 
 **Running Application**
+
 To run the application, run the following command in the root directory of the project
 - python app.py
 This will run the project and output in the terminal which ip it is running on.

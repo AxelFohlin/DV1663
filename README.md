@@ -2,6 +2,7 @@
 - You have to installed python 3.6 or later
 - Install sqlite3
     pip install sqlite
+
 **Running Application**
 To run the application, run the following command in the root directory of the project
 - python app.py
